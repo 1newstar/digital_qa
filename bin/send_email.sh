@@ -42,7 +42,7 @@ Digital QA
 
 **** System generated mail. This email box is not monitored, please do not reply or send mails to this ID ****
 
-" | /bin/mailx -s "Digital QA Log File - ${curDateTime}" -r "$4" "${attachments[@]}" $5
+" | mailx -s "Digital QA Log File - ${curDateTime}" -r "$4" "${attachments[@]}" $5
 
         mv $3 $JENKINS_HOME/workspace$folderPath/$1/
     else
