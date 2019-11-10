@@ -13,13 +13,14 @@
 # $3   - File name of generated report
 # $4   - Folder path of the job. No need to pass parameter if job created
 #        under jenkins home path
+# $5   - jenkins user name
+# $6   - jenkins password
 #
 #*****************************************************************************
 
 if [[ $# -lt 3 ]]; then
     echo "Insufficient argument passed"
 else
-    echo "hi"
     rm -f $3
     startLine="================================================================"
     endLine=$startLine
@@ -30,14 +31,18 @@ else
     numRows=0
     folderPathUrl=""
     folderPath=""
+    curlCredential=""
 
     if [ -n "$4" ]; then
        folderPathUrl=$(echo "$4" | sed 's/\//\/job\//g')
        folderPath=$(echo "$4" | sed 's/\//\/jobs\//g')
     fi
-    echo "$JENKINS_URL$folderPathUrl/job/$1/$2/api/json"
-    parentBuildDetails=$(curl -u admin:admin -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
-    echo "parentBuildDetails => $parentBuildDetails"
+    if [ -n "$5" -a -n "$6" ]; then
+       curlCredential="-u $5:$6"
+    fi
+
+    parentBuildDetails=$(curl $curlCredential -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
+    #echo "parentBuildDetails => $parentBuildDetails"
 
     while read jobName buildNumber ; do
        childJobNames[$numRows]=$jobName
