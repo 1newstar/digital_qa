@@ -24,26 +24,26 @@ else
     printf "%s\n\n" "$dividerUnderline"
 
     if ping -c 1 -W 1 "$1" > /dev/null ; then
-       echo "$1 is alive"
+       printf "%s\n\n" "$1 is alive"
     else
-      echo "$1 is not alive"
+       printf "%s\n\n" "$1 is not alive"
     fi
 
     result=$(ps -ef | grep TheLauncher | wc -l)
     if [[ $result -gt 1 ]]; then
-        echo "The scheduler is running"
+        printf "%s\n\n" "The scheduler is running"
     else
-        echo "The scheduler is stopped"
+        printf "%s\n\n" "The scheduler is stopped"
     fi
 
     if [ ! -d "$2" ]; then
-       echo "$2 folder not found"
+       printf "%s\n\n" "$2 folder not found"
     else
        result=$(find $2 -maxdepth 1 -ctime -1 -type f | wc -l)
        if [[ $result -eq 0 ]]; then
-           echo "No new file created from yesterday to today"
+           printf "%s\n\n" "No new file created from yesterday to today"
        else
-           echo "Total $result new file(s) created from yesterday to today"
+           printf "%s\n\n" "Total $result new file(s) created from yesterday to today"
        fi
     fi
     printf "\n\n%s\n" "$divider"
