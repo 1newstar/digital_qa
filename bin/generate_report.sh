@@ -25,56 +25,56 @@ else
     startLine="================================================================"
     endLine=$startLine
 
-    declare -A childJobNames
-    declare -A childBuildNumbers
-    jobNameList=""
-    numRows=0
-    folderPathUrl=""
-    folderPath=""
+    #declare -A childJobNames
+    #declare -A childBuildNumbers
+    #jobNameList=""
+    #numRows=0
+    #folderPathUrl=""
+    #folderPath=""
 
-    if [ -n "$4" ]; then
-       folderPathUrl=$(echo "$4" | sed 's/\//\/job\//g')
-       folderPath=$(echo "$4" | sed 's/\//\/jobs\//g')
-    fi
+    #if [ -n "$4" ]; then
+       #folderPathUrl=$(echo "$4" | sed 's/\//\/job\//g')
+       #folderPath=$(echo "$4" | sed 's/\//\/jobs\//g')
+    #fi
 
-    parentBuildDetails=$(curl -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
-    echo "parentBuildDetails => $parentBuildDetails"
+    #parentBuildDetails=$(curl -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
+    #echo "parentBuildDetails => $parentBuildDetails"
 	
-    while read jobName buildNumber ; do
-       childJobNames[$numRows]=$jobName
-       childBuildNumbers[$numRows]=$buildNumber
-       numRows=$((numRows + 1))
-    done < <(echo "$parentBuildDetails" | jq -r '.subBuilds[]|"\(.jobName) \(.buildNumber)"')
+    #while read jobName buildNumber ; do
+    #   childJobNames[$numRows]=$jobName
+    #   childBuildNumbers[$numRows]=$buildNumber
+    #   numRows=$((numRows + 1))
+    #done < <(echo "$parentBuildDetails" | jq -r '.subBuilds[]|"\(.jobName) \(.buildNumber)"')
 
-    IFS=$'\n' childJobNamesSorted=($(sort <<<"${childJobNames[*]}")); unset IFS
+    #IFS=$'\n' childJobNamesSorted=($(sort <<<"${childJobNames[*]}")); unset IFS
 
-    for i in "${!childJobNamesSorted[@]}"; do
-       for j in "${!childJobNames[@]}"; do
-          if [ "${childJobNamesSorted[$i]}" = "${childJobNames[$j]}" ]; then
-	     childJobNames[$j]="";
-	     jobName="${childJobNamesSorted[$i]}"
-	     buildNumber="${childBuildNumbers[$j]}"
-	     #printf "%s %s => %s => %s\n" "$i" "$j" "$jobName" "$buildNumber"
-	     sed -n "/$startLine/,/$endLine/p" $JENKINS_HOME/$folderPath/jobs/$jobName/builds/$buildNumber/log > tmp.txt
-	     buildlogLineCount=$(cat tmp.txt | sed '/^\s*$/d' | wc -l)
-	     if [[ buildlogLineCount -gt 0 ]]; then
-		 cat tmp.txt >> $3
-		 if [[ $((i+1)) -lt ${#childJobNamesSorted[@]} ]]; then
-                     printf "\n\n" >> $3
-                 fi
-	     fi
-	     break
-	  fi
-       done
-    done
+    #for i in "${!childJobNamesSorted[@]}"; do
+    #   for j in "${!childJobNames[@]}"; do
+    #      if [ "${childJobNamesSorted[$i]}" = "${childJobNames[$j]}" ]; then
+	#     childJobNames[$j]="";
+	#     jobName="${childJobNamesSorted[$i]}"
+	#     buildNumber="${childBuildNumbers[$j]}"
+	#     #printf "%s %s => %s => %s\n" "$i" "$j" "$jobName" "$buildNumber"
+	#     sed -n "/$startLine/,/$endLine/p" $JENKINS_HOME/$folderPath/jobs/$jobName/builds/$buildNumber/log > tmp.txt
+	#     buildlogLineCount=$(cat tmp.txt | sed '/^\s*$/d' | wc -l)
+	#     if [[ buildlogLineCount -gt 0 ]]; then
+	#	 cat tmp.txt >> $3
+	#	 if [[ $((i+1)) -lt ${#childJobNamesSorted[@]} ]]; then
+    #                 printf "\n\n" >> $3
+    #             fi
+	#     fi
+	#     break
+	#  fi
+    #   done
+    #done
 
-    rm -f tmp.txt
+    #rm -f tmp.txt
 
-    childJobNamesSorted=($(echo "${childJobNamesSorted[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-    for i in "${!childJobNamesSorted[@]}"; do
-       jobNameList="${jobNameList}, ${childJobNamesSorted[i]}"
-    done
+    #childJobNamesSorted=($(echo "${childJobNamesSorted[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+    #for i in "${!childJobNamesSorted[@]}"; do
+    #   jobNameList="${jobNameList}, ${childJobNamesSorted[i]}"
+    #done
     #echo "${jobNameList}" | sed -e 's/^[ \t]*//'
-    echo "${jobNameList:2}"
+    #echo "${jobNameList:2}"
 
 fi
