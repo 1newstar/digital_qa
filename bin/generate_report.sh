@@ -36,7 +36,7 @@ else
        folderPath=$(echo "$4" | sed 's/\//\/jobs\//g')
     fi
     echo "$JENKINS_URL$folderPathUrl/job/$1/$2/api/json"
-    parentBuildDetails=$(curl -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
+    parentBuildDetails=$(curl $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
     echo "parentBuildDetails => $parentBuildDetails"
 
     while read jobName buildNumber ; do
