@@ -25,18 +25,18 @@ else
     startLine="================================================================"
     endLine=$startLine
 
-    #declare -A childJobNames
-    #declare -A childBuildNumbers
-    #jobNameList=""
-    #numRows=0
-    #folderPathUrl=""
-    #folderPath=""
+    declare -A childJobNames
+    declare -A childBuildNumbers
+    jobNameList=""
+    numRows=0
+    folderPathUrl=""
+    folderPath=""
 
-    #if [ -n "$4" ]; then
-       #folderPathUrl=$(echo "$4" | sed 's/\//\/job\//g')
-       #folderPath=$(echo "$4" | sed 's/\//\/jobs\//g')
-    #fi
-
+    if [ -n "$4" ]; then
+       folderPathUrl=$(echo "$4" | sed 's/\//\/job\//g')
+       folderPath=$(echo "$4" | sed 's/\//\/jobs\//g')
+    fi
+    echo "folderPathUrl => $folderPathUrl"
     #parentBuildDetails=$(curl -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
     #echo "parentBuildDetails => $parentBuildDetails"
 	
