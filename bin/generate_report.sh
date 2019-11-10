@@ -1,20 +1,4 @@
 #!/bin/bash
-#*****************************************************************************
-#
-#Author:     Arnab Kumar Ray
-#Purpose:    This script consolidates the console log details of jenkins job.
-#Date:       20/09/2019
-#
-#To run the sheel script, following parameters need to pass
-# $1   - Parent job name for which build console log of all child jobs need
-#        to consolidate
-# $2   - Parent job build number for which build console log of all child jobs
-#        need to consolidate
-# $3   - File name of generated report
-# $4   - Folder path of the job. No need to pass parameter if job created
-#        under jenkins home path
-#
-#*****************************************************************************
 
 echo "dd $#"
 
