@@ -23,7 +23,7 @@ if [[ $# -lt 3 ]]; then
 else
     rm -f $3
     startLine="================================================================"
-    endLine="$startLine"
+    endLine=$startLine
 
     declare -A childJobNames
     declare -A childBuildNumbers
@@ -54,7 +54,7 @@ else
 	     jobName="${childJobNamesSorted[$i]}"
 	     buildNumber="${childBuildNumbers[$j]}"
 	     #printf "%s %s => %s => %s\n" "$i" "$j" "$jobName" "$buildNumber"
-	     sed -n "/$startLine/,/$endLine/{/$endLine/!p}" $JENKINS_HOME/$folderPath/jobs/$jobName/builds/$buildNumber/log > tmp.txt
+	     sed -n "/$startLine/,/$endLine/p" $JENKINS_HOME/$folderPath/jobs/$jobName/builds/$buildNumber/log > tmp.txt
 	     buildlogLineCount=$(cat tmp.txt | sed '/^\s*$/d' | wc -l)
 	     if [[ buildlogLineCount -gt 0 ]]; then
 		 cat tmp.txt >> $3

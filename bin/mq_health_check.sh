@@ -59,11 +59,11 @@ else
        fi
 
        if [[ $count -eq 0 ]]; then
-          divider="---------------------------------------------------------------------------------"
-          divider=$divider$divider
+          divider1="---------------------------------------------------------------------------------"
+          divider1=$divider1$divider1
           width=100
           printf "%-40s%-25s%-20s%-20s%-25s%-25s%-25s\n" "Queue Name" "Current queue depth" "Open input count" "Oldest message age" "Last put date & time" "Last get date & time" "Remarks"
-          printf "%${width}s\n" "$divider"
+          printf "%${width}s\n" "$divider1"
           count=$((count + 1))
        fi
        printf "%-40s%-25d%-20d%-20d%-25s%-25s%-25s\n" "$queue_name" "$queueDepth" "$queueIPProc" "$msg_age" "$lastPutDateTime" "$lastGetDateTime" "$message"
