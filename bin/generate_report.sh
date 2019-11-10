@@ -21,6 +21,7 @@ clear
 if [[ $# -lt 3 ]]; then
     echo "Insufficient argument passed"
 else
+    echo "hi"
     rm -f $3
     startLine="================================================================"
     endLine=$startLine
