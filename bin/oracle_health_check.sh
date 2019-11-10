@@ -331,7 +331,6 @@ exit
 EOF
 }
 
-clear
 if [[ $# -ne 6 ]]; then
    echo "Insufficient argument passed"
 elif [ ! -d "$3" ]; then

@@ -17,8 +17,6 @@
 #
 #*****************************************************************************
 
-clear
-
 if [[ $# -lt 3 ]]; then
     echo "Insufficient argument passed"
 else

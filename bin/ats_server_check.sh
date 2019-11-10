@@ -14,8 +14,6 @@
 #*****************************************************************************
 #./ats_server_check.sh "www.google.com" "/media/sf_data"
 
-clear
-
 if [[ $# -lt 2 ]]; then
     echo "Insufficient argument passed"
 else

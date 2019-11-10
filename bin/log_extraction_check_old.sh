@@ -1,5 +1,4 @@
 #!/bin/bash
-clear
 
 if [[ $# -ne 2 ]];then
     echo "Insufficient argument passed"

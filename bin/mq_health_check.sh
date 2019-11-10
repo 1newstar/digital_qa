@@ -12,8 +12,6 @@
 #
 #*****************************************************************************
 
-clear
-
 if [[ $# -ne 3 ]]; then
     echo "Insufficient argument passed"
 else

@@ -13,8 +13,6 @@
 #
 #*****************************************************************************
 
-clear
-
 if [[ $# -ne 3 ]]; then
     echo "Insufficient argument passed"
 elif [[ "$2" -le 0 ]]; then

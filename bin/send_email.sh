@@ -18,8 +18,6 @@
 #
 #*****************************************************************************
 
-clear
-
 if [[ $# -lt 5 ]]; then
     echo "Insufficient argument passed"
 else

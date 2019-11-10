@@ -29,7 +29,6 @@ exit
 EOF
 }
 
-clear
 if [[ $# -ne 3 ]]; then
    echo "Insufficient argument passed"
 elif [ ! -d "$2" ]; then

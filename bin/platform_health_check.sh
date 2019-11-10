@@ -49,7 +49,6 @@ diskusageCmpWithThreshold() {
   done
 }
 
-clear
 if [[ $# -ne 6 ]]; then
    echo "Insufficient argument passed"
 else

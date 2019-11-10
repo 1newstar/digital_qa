@@ -12,7 +12,6 @@
 #
 #*****************************************************************************
 
-clear
 divider="================================================================"
 printf "%s\n" "$divider"
 printf "%s\n" "APPLICATION URL CHECK"
@@ -21,4 +20,4 @@ printf "%s\n\n" "$dividerUnderline"
 
 wget --no-check-certificate -t 3 -O /dev/null $1
 
-printf "\n\n%s\n" "$divider"
+printf "%s\n" "$divider"
