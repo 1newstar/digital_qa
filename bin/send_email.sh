@@ -44,7 +44,6 @@ Digital QA
 
 " | mailx -s "Digital QA Log File - ${curDateTime}" -r "$4" "${attachments[@]}" $5
 
-        mv $3 $JENKINS_HOME/workspace$folderPath/$1/
 	echo "Mail sent successfully"
     else
 	echo "$3 file not found"
