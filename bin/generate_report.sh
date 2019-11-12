@@ -43,7 +43,7 @@ else
     if [ -n "$5" -a -n "$6" ]; then
        curlCredential="-u $5:$6"
     fi
-
+    echo "curl $curlCredential -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json"
     parentBuildDetails=$(curl $curlCredential -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
     #echo "parentBuildDetails => $parentBuildDetails"
 
@@ -77,8 +77,10 @@ else
 
     rm -f tmp.txt
 
-    if [ -n "$7" -a -n "$8" -a  test -f "$3" ]; then
-       cat "$3" | grep -E "$8" > $7
+    if [ -n "$7" -a -n "$8" -a ]; then
+       if test -f "$3"; then
+          cat "$3" | grep -E "$8" > $7
+       fi
     fi
 
     childJobNamesSorted=($(echo "${childJobNamesSorted[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
