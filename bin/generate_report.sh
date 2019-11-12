@@ -77,7 +77,7 @@ else
 
     rm -f tmp.txt
 
-    if [ -n "$7" -a -n "$8" -a ]; then
+    if [ -n "$7" -a -n "$8" ]; then
        if test -f "$3"; then
           cat "$3" | grep -E "$8" > $7
        fi
