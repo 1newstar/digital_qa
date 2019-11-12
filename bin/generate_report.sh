@@ -15,6 +15,8 @@
 #        under jenkins home path
 # $5   - jenkins user name
 # $6   - jenkins password
+# $7   - Error file name which will contain only error lines
+# $8   - Error line pattern. For multiple errors use pipe separator(i.e. |)
 #
 #*****************************************************************************
 
@@ -22,6 +24,7 @@ if [[ $# -lt 3 ]]; then
     echo "Insufficient argument passed"
 else
     rm -f $3
+    rm -f $8
     startLine="================================================================"
     endLine=$startLine
 
@@ -73,6 +76,10 @@ else
     done
 
     rm -f tmp.txt
+
+    if [ -n "$7" -a -n "$8" -a  test -f "$3" ]; then
+       cat "$3" | grep -E "$8" > $7
+    fi
 
     childJobNamesSorted=($(echo "${childJobNamesSorted[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
     for i in "${!childJobNamesSorted[@]}"; do

@@ -9,9 +9,11 @@
 # $1   - Host Name/IP Address of the virtual machine
 # $2   - Threshold value for CPU usage
 # $3   - Threshold value for Disk space usage
-# $4   - Threshold value for I/O usage
-# $5   - Threshold value for Memory usage
-# $6   - Threshold value for Network usage
+# $4   - List of file system separated by pipe sign (i.e. |) will be excluded
+#        in disk usage command
+# $5   - Threshold value for I/O usage
+# $6   - Threshold value for Memory usage
+# $7   - Threshold value for Network usage
 #
 #*****************************************************************************
 
@@ -82,11 +84,11 @@ else
     if [ -z "$3" ]; then
        printf "%s\n" "$result"
     else
-       EXCLUDE_LIST="tmpfs|cdrom|/media/sf_*|/dev/loop*"
+       excludeList=$4
        threshold=$3
        itemType="Disk space usage value"
-       if [ "$EXCLUDE_LIST" != "" ] ; then
-          printf "%s" "$result" | sed 1d | grep -vE "^${EXCLUDE_LIST}" | awk '{print $5 " " $6 " " $1}' | diskusageCmpWithThreshold
+       if [ -n "$excludeList" ] ; then
+          printf "%s" "$result" | sed 1d | grep -vE "^${excludeList}" | awk '{print $5 " " $6 " " $1}' | diskusageCmpWithThreshold
        else
 	  printf "%s" "$result" | sed 1d | awk '{print $5 " " $6 " " $1}' | diskusageCmpWithThreshold
        fi
@@ -96,10 +98,10 @@ else
     printf "%s\n" "$divider1"
     #result=$(iostat -c 1 2) #Show CPU only report with 1 seconds interval and 2 times reports
     result=$(iostat -c)
-    if [ -z "$4" ]; then
+    if [ -z "$5" ]; then
        printf "%s\n" "$result"
     else
-       threshold=$4
+       threshold=$5
        itemType="I/O usage value"
        #
        # adding %user, %nice and %system value of "avg-cpu" rows(s). where
@@ -113,10 +115,10 @@ else
     printf "\n%s\n" "Virtual memory"
     printf "%s\n" "$divider1"
     result=$(vmstat -S m) #Show in Megabytes with parameters -S and m/M. By default vmstat displays statistics in kilobytes.
-    if [ -z "$5" ]; then
+    if [ -z "$6" ]; then
        printf "%s\n" "$result"
     else
-       threshold=$5
+       threshold=$6
        itemType="Virtual memory free value"
        #comparing free value with threshold
        printf "%s" "$result" | awk -F: '/free/ && $0 != "" { getline; print $0}' | awk '{print $4}' | cmpWithThreshold
@@ -125,7 +127,7 @@ else
     printf "\n%s\n" "Network"
     printf "%s\n" "$divider1"
     result=$(netstat)
-    if [ -z "$6" ]; then
+    if [ -z "$7" ]; then
        printf "%s\n" "$result"
     else
        echo "Need to add compare logic"
