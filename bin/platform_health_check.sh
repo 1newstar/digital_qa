@@ -51,7 +51,7 @@ diskusageCmpWithThreshold() {
   done
 }
 
-if [[ $# -ne 6 ]]; then
+if [[ $# -lt 7 ]]; then
    echo "Insufficient argument passed"
 else
     divider="================================================================"
