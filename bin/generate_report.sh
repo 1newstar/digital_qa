@@ -79,7 +79,7 @@ else
 
     if [ -n "$7" -a -n "$8" ]; then
        if test -f "$3"; then
-          cat "$3" | grep -E "$8" > $7
+          cat "$3" | grep -iE "$8" > $7
        fi
     fi
 

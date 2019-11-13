@@ -8,11 +8,15 @@
 #To run the sheel script, following parameters need to pass
 # $1   - Host Name/IP Address of the virtual machine
 # $2   - Queue manger name.
-# $3   - List of queues separator by comma
+# $3   - Channel name
+# $4   - List of queues separator by comma
+# $5   - Individual queue cheeck. Pass Y for individual, N or "" for all value check
+# $6   - Thresold value for difference of get time & put time
+# $7   - Thresold value for queue current depth 
 #
 #*****************************************************************************
 
-if [[ $# -ne 3 ]]; then
+if [[ $# -lt 5 ]]; then
     echo "Insufficient argument passed"
 else
     divider="================================================================"
@@ -21,8 +25,18 @@ else
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 
+    
+    MQ_CMD_OUTPUT=$( eval 'echo "display chstatus(MO.CHANNEL) STATUS" | runmqsc $2')
+	channelStatus=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "STATUS\\(.+\\)" {gsub("STATUS\\(|\\)","");print $1}')
+	echo "channelStatus $channelStatus"
+	if [ "$channelStatus" = "RUNNING" ]; then
+	   printf "%s\n" "Channel is running"
+	else
+	   printf "%s\n" "Channel is not running or invalid channel name"
+	fi
+	
     count=0
-    IFS=, read -ra ary <<<$3
+    IFS=, read -ra ary <<<$4
     for i in "${!ary[@]}"; do
        queue_name=${ary[$i]};
        MQ_CMD_OUTPUT=$( eval 'echo "display qstatus($queue_name) CURDEPTH IPPROCS MSGAGE LGETDATE LGETTIME LPUTDATE LPUTTIME" | runmqsc $2')
@@ -49,7 +63,7 @@ else
           startDate=$(date -d "$lastGetDateTime" +%s)
           endDate=$(date -d "$lastPutDateTime" +%s)
           let queueGetPutTimeDiff=$(($startDate - $endDate))
-          if [[ $queueDepth -gt 0 && $queueGetPutTimeDiff -gt 1 ]]; then
+          if [[ $queueDepth -gt 0 && $queueGetPutTimeDiff -gt $5 ]]; then
              message="Message(s) not consuming" 
           else
              message="Message(s) consuming"
