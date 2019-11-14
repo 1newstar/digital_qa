@@ -53,8 +53,6 @@ else
     done < <(echo "$parentBuildDetails" | jq -r '.subBuilds[]|"\(.jobName) \(.buildNumber)"')
 
     IFS=$'\n' childJobNamesSorted=($(sort <<<"${childJobNames[*]}")); unset IFS
-    curDateTime=$(date "+%d-%m-%Y %H:%M:%S")
-	printf "%s\n\n" "$curDateTime" >> $3
     for i in "${!childJobNamesSorted[@]}"; do
        for j in "${!childJobNames[@]}"; do
           if [ "${childJobNamesSorted[$i]}" = "${childJobNames[$j]}" ]; then
