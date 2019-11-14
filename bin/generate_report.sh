@@ -43,9 +43,8 @@ else
     if [ -n "$5" -a -n "$6" ]; then
        curlCredential="-u $5:$6"
     fi
-    echo "curl $curlCredential -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json"
+
     parentBuildDetails=$(curl $curlCredential -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
-    #echo "parentBuildDetails => $parentBuildDetails"
 
     while read jobName buildNumber ; do
        childJobNames[$numRows]=$jobName
