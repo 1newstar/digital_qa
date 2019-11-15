@@ -29,9 +29,9 @@ else
        folderPath="$6"
     fi
 
-    [[ -f "$3" ]] && attachments=( -a "$3" )
+    [[ -f "$3" ]] && attachments=( -A "$3" )
     appFlowCheckRpt="$JENKINS_HOME/workspace$folderPath/$1/AppFlowCheckReport.zip"
-    [[ -f "$appFlowCheckRpt" ]] && attachments+=( -a "$appFlowCheckRpt" )
+    [[ -f "$appFlowCheckRpt" ]] && attachments+=( -A "$appFlowCheckRpt" )
     [[ -f "$appFlowCheckRpt" ]] && extMsg="Please check AppFlowCheckReport.zip under workspace folder of $folderPath/$1."
 
     if [[ "${#attachments[@]}" -gt 0 ]]; then
