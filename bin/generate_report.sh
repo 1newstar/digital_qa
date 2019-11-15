@@ -46,12 +46,14 @@ else
 
     parentBuildDetails=$(curl $curlCredential -s $JENKINS_URL$folderPathUrl/job/$1/$2/api/json)
 
+    #fetch child job name and corresponding build number from parent job
     while read jobName buildNumber ; do
        childJobNames[$numRows]=$jobName
        childBuildNumbers[$numRows]=$buildNumber
        numRows=$((numRows + 1))
     done < <(echo "$parentBuildDetails" | jq -r '.subBuilds[]|"\(.jobName) \(.buildNumber)"')
 
+    #retrieve log details of ascending order sorted child job name list
     IFS=$'\n' childJobNamesSorted=($(sort <<<"${childJobNames[*]}")); unset IFS
     for i in "${!childJobNamesSorted[@]}"; do
        for j in "${!childJobNames[@]}"; do
@@ -85,7 +87,6 @@ else
     for i in "${!childJobNamesSorted[@]}"; do
        jobNameList="${jobNameList}, ${childJobNamesSorted[i]}"
     done
-    #echo "${jobNameList}" | sed -e 's/^[ \t]*//'
-    echo "${jobNameList:2}"
+    echo "${jobNameList:2}" | sed "s/\(.*\), /\1 and /"
 
 fi

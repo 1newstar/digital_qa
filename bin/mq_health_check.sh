@@ -7,16 +7,15 @@
 #
 #To run the sheel script, following parameters need to pass
 # $1   - Host Name/IP Address of the virtual machine
-# $2   - Queue manger name.
-# $3   - Channel name
-# $4   - List of queues separator by comma
-# $5   - Individual queue cheeck. Pass Y for individual, N or "" for all value check
-# $6   - Thresold value for difference of get time & put time
-# $7   - Thresold value for queue current depth 
+# $2   - Queue manger name
+# $3   - List of queues separator by comma
+# $4   - Individual queue cheeck. pass Y for individual, N or "" for all value check
+# $5   - Thresold value for difference of get time & put time
+# $6   - Thresold value for queue current depth
 #
 #*****************************************************************************
 
-if [[ $# -lt 5 ]]; then
+if [[ $# -ne 3 ]]; then
     echo "Insufficient argument passed"
 else
     divider="================================================================"
@@ -25,61 +24,86 @@ else
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 
-    
-    MQ_CMD_OUTPUT=$( eval 'echo "display chstatus(MO.CHANNEL) STATUS" | runmqsc $2')
-	channelStatus=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "STATUS\\(.+\\)" {gsub("STATUS\\(|\\)","");print $1}')
-	echo "channelStatus $channelStatus"
-	if [ "$channelStatus" = "RUNNING" ]; then
-	   printf "%s\n" "Channel is running"
-	else
-	   printf "%s\n" "Channel is not running or invalid channel name"
-	fi
-	
-    count=0
-    IFS=, read -ra ary <<<$4
-    for i in "${!ary[@]}"; do
-       queue_name=${ary[$i]};
-       MQ_CMD_OUTPUT=$( eval 'echo "display qstatus($queue_name) CURDEPTH IPPROCS MSGAGE LGETDATE LGETTIME LPUTDATE LPUTTIME" | runmqsc $2')
+    getTimePutTimeThresold=1
+    if [ -n "$5" ]; then
+       getTimePutTimeThresold=$5
+    fi
 
-       queueDepth=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "CURDEPTH\\(.+\\)" {gsub("CURDEPTH\\(|\\)","");print $1}')
-       queueIPProc=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "IPPROCS\\(.+\\)" {gsub("IPPROCS\\(|\\)","");print $2}')
-       msg_age=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "MSGAGE\\(.+\\)" {gsub("MSGAGE\\(|\\)","");print $1}')
+    MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY STATUS" | dspmq | grep "$2"')
+    queueStatus=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "STATUS\\(.+\\)" {gsub("STATUS\\(|\\)","");print $2}')
+    if [ "$queueStatus" = "Running" ]; then
+        printf "%s\n\n" "Queue manager $2 is running"
 
-       lGetDate=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "LGETDATE\\(.+\\)" {gsub("LGETDATE\\(|\\)","");print $1}')
-       lGetTime=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "LGETTIME\\(.+\\)" {gsub("LGETTIME\\(|\\)","");print $2}' | tr . : )
-       lastGetDateTime="$lGetDate $lGetTime"
-       lastGetDateTime=$( eval 'echo $lastGetDateTime | sed -r s/[.]+/:/g' )
+	#channel check
+	MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY CHANNEL(*)" | runmqsc $2')
+	channelList=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "CHANNEL\\(.+\\)" {gsub("CHANNEL\\(|\\)","");print $1}' | grep -v "SYSTEM.")
+	IFS=$'\n' read -rd '' -a channelList <<<"$channelList"
+	for i in "${!channelList[@]}"; do
+            if [[ $i -eq 0 ]]; then
+               printf "%-40s%-20s\n" "Channel Name" "Status"
+	       printf "%s\n\n" "$dividerUnderline"
+            fi
+            MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY CHSTATUS(${channelList[$i]})" | runmqsc $2')
+	    channelStatus=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "STATUS\\(.+\\)" {gsub("STATUS\\(|\\)","");print $1}')
+	    IFS=$'\n' read -rd '' -a channelStatus <<<"$channelStatus"
+	    if [ "${channelStatus[0]}" == "" ]; then
+	       channelStatus="NOT RUNNING"
+	    else
+	       channelStatus=${channelStatus[0]}
+	    fi
+            printf "%-40s%-20s\n" "${channelList[$i]}" "$channelStatus"
+	done
+	printf "\n\n"
 
-       lPutDate=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "LPUTDATE\\(.+\\)" {gsub("LPUTDATE\\(|\\)","");print $1}' )
-       lPutTime=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "LPUTTIME\\(.+\\)" {gsub("LPUTTIME\\(|\\)","");print $2}' | tr . : )
-       lastPutDateTime="$lPutDate $lPutTime"
-       lastPutDateTime=$(eval 'echo $lastPutDateTime | sed -r s/[.]+/:/g')
+        count=0
+        IFS=, read -ra ary <<<$3
+        for i in "${!ary[@]}"; do
+            queue_name=${ary[$i]};
+            MQ_CMD_OUTPUT=$( eval 'echo "DISPLAY QSTATUS($queue_name) CURDEPTH IPPROCS MSGAGE LGETDATE LGETTIME LPUTDATE LPUTTIME" | runmqsc $2')
 
-       if [ "$lastGetDateTime" == "" -o "$lastPutDateTime" == "" ]; then
-          lastGetDateTime="NA"
-          lastPutDateTime="NA"
-          message="NA"
-       else
-          startDate=$(date -d "$lastGetDateTime" +%s)
-          endDate=$(date -d "$lastPutDateTime" +%s)
-          let queueGetPutTimeDiff=$(($startDate - $endDate))
-          if [[ $queueDepth -gt 0 && $queueGetPutTimeDiff -gt $5 ]]; then
-             message="Message(s) not consuming" 
-          else
-             message="Message(s) consuming"
-          fi
-       fi
+            queueDepth=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "CURDEPTH\\(.+\\)" {gsub("CURDEPTH\\(|\\)","");print $1}')
+            queueIPProc=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "IPPROCS\\(.+\\)" {gsub("IPPROCS\\(|\\)","");print $2}')
+            msg_age=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "MSGAGE\\(.+\\)" {gsub("MSGAGE\\(|\\)","");print $1}')
 
-       if [[ $count -eq 0 ]]; then
-          divider1="---------------------------------------------------------------------------------"
-          divider1=$divider1$divider1
-          width=100
-          printf "%-40s%-25s%-20s%-20s%-25s%-25s%-25s\n" "Queue Name" "Current queue depth" "Open input count" "Oldest message age" "Last put date & time" "Last get date & time" "Remarks"
-          printf "%${width}s\n" "$divider1"
-          count=$((count + 1))
-       fi
-       printf "%-40s%-25d%-20d%-20d%-25s%-25s%-25s\n" "$queue_name" "$queueDepth" "$queueIPProc" "$msg_age" "$lastPutDateTime" "$lastGetDateTime" "$message"
+            lGetDate=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "LGETDATE\\(.+\\)" {gsub("LGETDATE\\(|\\)","");print $1}')
+            lGetTime=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "LGETTIME\\(.+\\)" {gsub("LGETTIME\\(|\\)","");print $2}' | tr . : )
+            lastGetDateTime="$lGetDate $lGetTime"
+            lastGetDateTime=$( eval 'echo $lastGetDateTime | sed -r s/[.]+/:/g' )
 
-    done
+            lPutDate=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "LPUTDATE\\(.+\\)" {gsub("LPUTDATE\\(|\\)","");print $1}' )
+            lPutTime=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "LPUTTIME\\(.+\\)" {gsub("LPUTTIME\\(|\\)","");print $2}' | tr . : )
+            lastPutDateTime="$lPutDate $lPutTime"
+            lastPutDateTime=$(eval 'echo $lastPutDateTime | sed -r s/[.]+/:/g')
+
+            if [ "$lastGetDateTime" == "" -o "$lastPutDateTime" == "" ]; then
+               lastGetDateTime="NA"
+               lastPutDateTime="NA"
+               message="NA"
+            else
+               startDate=$(date -d "$lastGetDateTime" +%s)
+               endDate=$(date -d "$lastPutDateTime" +%s)
+               let queueGetPutTimeDiff=$(($startDate - $endDate))
+	       if [[ $queueDepth -gt 0 && $queueGetPutTimeDiff -gt $getTimePutTimeThresold ]]; then
+                   message="Message(s) not consuming"
+               else
+                   message="Message(s) consuming"
+               fi
+            fi
+
+            if [[ $count -eq 0 ]]; then
+                divider1="---------------------------------------------------------------------------------"
+                divider1=$divider1$divider1
+                width=100
+                printf "%-40s%-25s%-20s%-20s%-25s%-25s%-25s\n" "Queue Name" "Current queue depth" "Open input count" "Oldest message age" "Last put date & time" "Last get date & time" "Remarks"
+                printf "%${width}s\n" "$divider1"
+                count=$((count + 1))
+            fi
+            printf "%-40s%-25d%-20d%-20d%-25s%-25s%-25s\n" "$queue_name" "$queueDepth" "$queueIPProc" "$msg_age" "$lastPutDateTime" "$lastGetDateTime" "$message"
+
+        done
+    else
+	printf "%s" "Queue Manager is not running"
+    fi
+
     printf "\n\n%s\n" "$divider"
 fi
