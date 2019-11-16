@@ -346,7 +346,7 @@ else
 
     divider="================================================================"
     printf "%s\n" "$divider"
-    printf "%s\n" "DATABASE SERVER HEALTH CHECK - $1"
+    printf "%s\n" "ORACLE SERVER HEALTH CHECK - $1"
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 

@@ -87,6 +87,7 @@ else
     for i in "${!childJobNamesSorted[@]}"; do
        jobNameList="${jobNameList}, ${childJobNamesSorted[i]}"
     done
+
     echo "${jobNameList:2}" | sed "s/\(.*\), /\1 and /"
 
 fi

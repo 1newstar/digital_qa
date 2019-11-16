@@ -22,17 +22,12 @@ if [[ $# -lt 5 ]]; then
     echo "Insufficient argument passed"
 else
     curDateTime=$(date "+%d-%m-%Y %H:%M:%S")
-    folderPath=""
     extMsg=""
 
-    if [ -n "$6" ]; then
-       folderPath="$6"
-    fi
-
-    [[ -f "$3" ]] && attachments=( -a "$3" )
-    appFlowCheckRpt="$JENKINS_HOME/workspace$folderPath/$1/AppFlowCheckReport.zip"
+    [[ -f "$3" ]] && attachments+=( -a "$3" )
+    appFlowCheckRpt="$JENKINS_HOME/workspace$6/$1/AppFlowCheckReport.zip"
     [[ -f "$appFlowCheckRpt" ]] && attachments+=( -a "$appFlowCheckRpt" )
-    [[ -f "$appFlowCheckRpt" ]] && extMsg="Please check AppFlowCheckReport.zip under workspace folder of $folderPath/$1."
+    [[ -f "$appFlowCheckRpt" ]] && extMsg="Please check AppFlowCheckReport.zip under workspace folder of $JENKINS_HOME/workspace$6/$1."
 
     if [[ "${#attachments[@]}" -gt 0 ]]; then
         echo "PFA Digital QA log file for $2 job(s). $extMsg
