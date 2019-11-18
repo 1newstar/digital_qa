@@ -17,9 +17,10 @@
 if [[ $# -lt 2 ]]; then
     echo "Insufficient argument passed"
 else
+    hostName=$(hostname --fqdn)
     divider="================================================================"
     printf "%s\n" "$divider"
-    printf "%s\n" "ATS SERVER CHECK"
+    printf "%s\n" "ATS SERVER CHECK - $hostName"
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 

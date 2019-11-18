@@ -7,10 +7,9 @@
 #Date:       15-11-2019
 #
 #To run the sheel script, following parameters need to pass
-# $1   - Host Name/IP Address of the virtual machine
-# $2   - db2 name of the db2 instance (wwprt3)
-# $3   - db2 username (prtdbmon)
-# $4   - db2 password
+# $1   - db2 name of the db2 instance (wwprt3)
+# $2   - db2 username (prtdbmon)
+# $3   - db2 password
 #
 #***********************************************************************************
 
@@ -23,11 +22,11 @@ databaseConnectionCheck() {
        printf "%s" "Unable to connect database $1 by user $2"
    else
        printf "%s" "Successfully connected database $1 by user $2"
-	   #Connect Reset breaks a connection to a database , but does not terminate the back-end process
-	   #If an application is connected to a database, or a process is in the middle of a unit of work, TERMINATE causes the database connection to be lost
-	   #https://technowizardz.wordpress.com/2012/07/11/connect-disconnect-from-db2-instance/
-	   result=`db2 connect reset`
-	   printf "%s" "$result"
+       #Connect Reset breaks a connection to a database , but does not terminate the back-end process
+       #If an application is connected to a database, or a process is in the middle of a unit of work, TERMINATE causes the database connection to be lost
+       #https://technowizardz.wordpress.com/2012/07/11/connect-disconnect-from-db2-instance/
+       result=`db2 connect reset`
+       printf "%s" "$result"
    fi
 }
 
@@ -68,12 +67,13 @@ deadlockDetails() {
    printf "%s" "$result"
 }
 
-if [[ $# -ne 4 ]]; then
+if [[ $# -ne 3 ]]; then
     echo "Insufficient argument passed"
 else
+    hostName=$(hostname --fqdn)
     divider="================================================================"
     printf "%s\n" "$divider"
-    printf "%s\n" "DB2 SERVER HEALTH CHECK - $1"
+    printf "%s\n" "DB2 SERVER HEALTH CHECK - $hostName"
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 
@@ -81,7 +81,7 @@ else
 
     printf "%s\n" "Database connection check"
     printf "%s\n" "$divider1"
-    databaseConnectionCheck $2 $3 $4;
+    databaseConnectionCheck $1 $2 $3;
 
     printf "\n%s\n" "Connection pool count"
     printf "%s\n" "$divider1"
@@ -89,7 +89,7 @@ else
 
     printf "\n%s\n" "Long running queries"
     printf "%s\n" "$divider1"
-    longRunningQueries $2 $3 $4;
+    longRunningQueries $1 $2 $3;
 
     printf "\n%s\n" "Database deadlock details"
     printf "%s\n" "$divider1"

@@ -6,36 +6,36 @@
 #Date:       20/09/2019
 #
 #To run the sheel script, following parameters need to pass
-# $1   - Host Name/IP Address of the virtual machine
-# $2   - Queue manger name
-# $3   - List of queues separator by comma
-# $4   - Individual queue cheeck. pass Y for individual, N or "" for all value check
-# $5   - Thresold value for difference of get time & put time
-# $6   - Thresold value for queue current depth
+# $1   - Queue manger name
+# $2   - List of queues separator by comma
+# $3   - Individual queue cheeck. pass Y for individual, N or "" for all value check
+# $4   - Thresold value for difference of get time & put time
+# $5   - Thresold value for queue current depth
 #
 #*****************************************************************************
 
-if [[ $# -ne 3 ]]; then
+if [[ $# -ne 2 ]]; then
     echo "Insufficient argument passed"
 else
+    hostName=$(hostname --fqdn)
     divider="================================================================"
     printf "%s\n" "$divider"
-    printf "%s\n" "MESSAGE QUEUE HEALTH CHECK - $1"
+    printf "%s\n" "MESSAGE QUEUE HEALTH CHECK - $hostName"
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 
     getTimePutTimeThresold=1
-    if [ -n "$5" ]; then
-       getTimePutTimeThresold=$5
+    if [ -n "$4" ]; then
+       getTimePutTimeThresold=$4
     fi
 
-    MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY STATUS" | dspmq | grep "$2"')
+    MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY STATUS" | dspmq | grep "$1"')
     queueStatus=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "STATUS\\(.+\\)" {gsub("STATUS\\(|\\)","");print $2}')
     if [ "$queueStatus" = "Running" ]; then
-        printf "%s\n\n" "Queue manager $2 is running"
+        printf "%s\n\n" "Queue manager $1 is running"
 
 	#channel check
-	MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY CHANNEL(*)" | runmqsc $2')
+	MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY CHANNEL(*)" | runmqsc $1')
 	channelList=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "CHANNEL\\(.+\\)" {gsub("CHANNEL\\(|\\)","");print $1}' | grep -v "SYSTEM.")
 	IFS=$'\n' read -rd '' -a channelList <<<"$channelList"
 	for i in "${!channelList[@]}"; do
@@ -43,7 +43,7 @@ else
                printf "%-40s%-20s\n" "Channel Name" "Status"
 	       printf "%s\n\n" "$dividerUnderline"
             fi
-            MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY CHSTATUS(${channelList[$i]})" | runmqsc $2')
+            MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY CHSTATUS(${channelList[$i]})" | runmqsc $1')
 	    channelStatus=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "STATUS\\(.+\\)" {gsub("STATUS\\(|\\)","");print $1}')
 	    IFS=$'\n' read -rd '' -a channelStatus <<<"$channelStatus"
 	    if [ "${channelStatus[0]}" == "" ]; then
@@ -56,10 +56,10 @@ else
 	printf "\n\n"
 
         count=0
-        IFS=, read -ra ary <<<$3
+        IFS=, read -ra ary <<<$2
         for i in "${!ary[@]}"; do
             queue_name=${ary[$i]};
-            MQ_CMD_OUTPUT=$( eval 'echo "DISPLAY QSTATUS($queue_name) CURDEPTH IPPROCS MSGAGE LGETDATE LGETTIME LPUTDATE LPUTTIME" | runmqsc $2')
+            MQ_CMD_OUTPUT=$( eval 'echo "DISPLAY QSTATUS($queue_name) CURDEPTH IPPROCS MSGAGE LGETDATE LGETTIME LPUTDATE LPUTTIME" | runmqsc $1')
 
             queueDepth=$(echo "$MQ_CMD_OUTPUT" | awk '$1 ~ "CURDEPTH\\(.+\\)" {gsub("CURDEPTH\\(|\\)","");print $1}')
             queueIPProc=$(echo "$MQ_CMD_OUTPUT" | awk '$2 ~ "IPPROCS\\(.+\\)" {gsub("IPPROCS\\(|\\)","");print $2}')

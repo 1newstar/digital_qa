@@ -24,9 +24,10 @@ elif [ ! -d "$2" ]; then
 elif [[ "$4" -le 0 ]]; then
     echo "Value of parameter admin_server_port should be greater than 0"
 else
+    hostName=$(hostname --fqdn)
     divider="================================================================"
     printf "%s\n" "$divider"
-    printf "%s\n" "WEBLOGIC SERVER HEALTH CHECK - $3"
+    printf "%s\n" "WEBLOGIC SERVER HEALTH CHECK - $hostName"
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 

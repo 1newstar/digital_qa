@@ -8,12 +8,11 @@
 #Date:       20/09/2019
 #
 #To run the sheel script, following parameters need to pass
-# $1   - Host Name/IP Address of the virtual machine
-# $2   - Oracle SID
-# $3   - Oracle Home Path
-# $4   - Schema Name
-# $5   - Number of records needs to select
-# $6   - CPU usage threshold
+# $1   - Oracle SID
+# $2   - Oracle Home Path
+# $3   - Schema Name
+# $4   - Number of records needs to select
+# $5   - CPU usage threshold
 #
 #*****************************************************************************
 
@@ -331,27 +330,28 @@ exit
 EOF
 }
 
-if [[ $# -ne 6 ]]; then
+if [[ $# -ne 5 ]]; then
    echo "Insufficient argument passed"
-elif [ ! -d "$3" ]; then
+elif [ ! -d "$2" ]; then
    echo "Value of parameter oracle_home not found"
-elif [ ! -d "$3/db_1/bin" ]; then
-   echo "Directory \"$3/db_1/bin\" not found"
-elif [ ! -x "$3/db_1/bin/sqlplus" ]; then
-   echo "Executable \"$3/db_1/bin/sqlplus\" not found"
-elif [ ! -x "$3/db_1/bin/tnsping" ]; then
-   echo "Executable \"$3/db_1/bin/tnsping\" not found"
+elif [ ! -d "$2/db_1/bin" ]; then
+   echo "Directory \"$2/db_1/bin\" not found"
+elif [ ! -x "$2/db_1/bin/sqlplus" ]; then
+   echo "Executable \"$2/db_1/bin/sqlplus\" not found"
+elif [ ! -x "$2/db_1/bin/tnsping" ]; then
+   echo "Executable \"$2/db_1/bin/tnsping\" not found"
 else
+    hostName=$(hostname --fqdn)
     cpuStatisticsFile="cpuStatistics$(date +%d%m%Y%H%M%S%N).txt"
 
     divider="================================================================"
     printf "%s\n" "$divider"
-    printf "%s\n" "ORACLE SERVER HEALTH CHECK - $1"
+    printf "%s\n" "ORACLE SERVER HEALTH CHECK - $hostName"
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 
-    export ORACLE_SID=$2
-    export ORACLE_HOME=$3/db_1
+    export ORACLE_SID=$1
+    export ORACLE_HOME=$2/db_1
     #export TNS_ADMIN=${ORACLE_HOME}/network/admin
     export PATH=$PATH:${ORACLE_HOME}/bin
     #export ORAENV_ASK=NO
@@ -360,11 +360,11 @@ else
 
     printf "%s\n" "Top $5 sqls based on elapsed time"
     printf "%s" "$divider1"
-    topNSQLQueryElpTime $4 $5;
+    topNSQLQueryElpTime $3 $4;
 
-    printf "\n%s\n" "Top $5 sqls based on disk io"
+    printf "\n%s\n" "Top $4 sqls based on disk io"
     printf "%s" "$divider1"
-    topNSQLQueryDiskIO $5;
+    topNSQLQueryDiskIO $4;
 
     printf "\n%s\n" "Long running transactions in database"
     printf "%s" "$divider1"
@@ -382,7 +382,7 @@ else
     printf "%s\n" "$divider1"
     longRunningArchival;
 
-    printf "\n%s\n" "CPU statistics - hours where cpu>$6%"
+    printf "\n%s\n" "CPU statistics - hours where cpu>$5%"
     printf "%s\n" "$divider1"
     output=$(cpuStatistics $6 "$cpuStatisticsFile")
     sed -i "/old \|new /d" "$cpuStatisticsFile"
@@ -390,7 +390,7 @@ else
     rm -f "$cpuStatisticsFile"
 
     export ORACLE_SID="+ASM"
-    export ORACLE_HOME=$3/grid
+    export ORACLE_HOME=$2/grid
     printf "\n%s\n" "Disk usage - asm details in database"
     printf "%s\n" "$divider1"
     diskUsage;

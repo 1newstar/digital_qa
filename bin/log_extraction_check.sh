@@ -7,26 +7,26 @@
 #Date:       20/09/2019
 #
 #To run the sheel script, following parameters need to pass
-# $1   - Host Name/IP Address of the virtual machine
-# $2   - Time interval (in minutes) within which ERROR trace needs to extract
-# $3   - Log files folder path
+# $1   - Time interval (in minutes) within which ERROR trace needs to extract
+# $2   - Log files folder path
 #
 #*****************************************************************************
 
-if [[ $# -ne 3 ]]; then
+if [[ $# -ne 2 ]]; then
     echo "Insufficient argument passed"
-elif [[ "$2" -le 0 ]]; then
+elif [[ "$1" -le 0 ]]; then
    echo "Value of parameter time_interval should be greater than 0"
-elif [ ! -d "$3" ]; then
+elif [ ! -d "$2" ]; then
    echo "Value of parameter log_folder_path not found"
 else
+    hostName=$(hostname --fqdn)
     fileFound="false"
     errorFound="false"
-    fromDateTime=$( date --date="-$2min" "+%Y-%m-%d %H:%M:%S")
+    fromDateTime=$( date --date="-$1min" "+%Y-%m-%d %H:%M:%S")
     toDateTime=$( date "+%Y-%m-%d %H:%M:%S" )
     divider="================================================================"
     printf "%s\n" "$divider"
-    printf "%s\n" "APPLICATION LOG CHECK - $1"
+    printf "%s\n" "APPLICATION LOG CHECK - $hostName"
     dividerUnderline="----------------------------------------------------------------"
     printf "%s\n\n" "$dividerUnderline"
 
@@ -35,7 +35,7 @@ else
     printf "Extraction of ERROR from log file(s) within time range %s and %s\n" "$fromDateTime" "$toDateTime"
     printf "%s\n\n" "$divider1$divider1$divider1"
 
-    for file in $( find $3 -mmin -$2 -type f \( -name "*log*" -o -name "*.log" \) -size +0c | sort )
+    for file in $( find $2 -mmin -$1 -type f \( -name "*log*" -o -name "*.log" \) -size +0c | sort )
     do
        if [ $fileFound == "false" ]; then
 	  fileFound="true"

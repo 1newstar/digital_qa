@@ -44,9 +44,10 @@ else
    propFile="$orghere/../config/sqlQueries.properties"
 
    if [ -f "$propFile" ]; then
+      hostName=$(hostname --fqdn)
       divider="================================================================"
       printf "%s\n" "$divider"
-      printf "%s\n" "SQL Query Executor"
+      printf "%s\n" "SQL Query Executor - $hostName"
       dividerUnderline="----------------------------------------------------------------"
       printf "%s\n\n" "$dividerUnderline"
 
