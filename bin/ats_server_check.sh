@@ -12,7 +12,6 @@
 # $2   - Folder Path to check whether new file generated or not
 #
 #*****************************************************************************
-#./ats_server_check.sh "www.google.com" "/media/sf_data"
 
 if [[ $# -lt 2 ]]; then
     echo "Insufficient argument passed"
@@ -47,5 +46,6 @@ else
            printf "%s\n\n" "Total $result new file(s) created from yesterday to today"
        fi
     fi
+
     printf "\n\n%s\n" "$divider"
 fi

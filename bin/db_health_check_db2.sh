@@ -7,8 +7,8 @@
 #Date:       15-11-2019
 #
 #To run the sheel script, following parameters need to pass
-# $1   - db2 name of the db2 instance (wwprt3)
-# $2   - db2 username (prtdbmon)
+# $1   - db2 name of the db2 instance
+# $2   - db2 username
 # $3   - db2 password
 #
 #***********************************************************************************
@@ -96,5 +96,5 @@ else
     deadlockDetails
 
     printf "\n\n%s\n" "$divider"
-
 fi
+

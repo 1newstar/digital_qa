@@ -8,13 +8,12 @@
 #To run the sheel script, following parameters need to pass
 # $1   - Queue manger name
 # $2   - List of queues separator by comma
-# $3   - Individual queue cheeck. pass Y for individual, N or "" for all value check
-# $4   - Thresold value for difference of get time & put time
-# $5   - Thresold value for queue current depth
-#
+# $3   - Thresold value for difference of get time & put time
+# $4   - Application name for which queue depth need to compare 
+# 
 #*****************************************************************************
 
-if [[ $# -ne 2 ]]; then
+if [[ $# -lt 2 ]]; then
     echo "Insufficient argument passed"
 else
     hostName=$(hostname --fqdn)
@@ -25,8 +24,8 @@ else
     printf "%s\n\n" "$dividerUnderline"
 
     getTimePutTimeThresold=1
-    if [ -n "$4" ]; then
-       getTimePutTimeThresold=$4
+    if [ -n "$3" ]; then
+       getTimePutTimeThresold=$3
     fi
 
     MQ_CMD_OUTPUT=$(eval 'echo "DISPLAY STATUS" | dspmq | grep "$1"')
@@ -101,9 +100,34 @@ else
             printf "%-40s%-25d%-20d%-20d%-25s%-25s%-25s\n" "$queue_name" "$queueDepth" "$queueIPProc" "$msg_age" "$lastPutDateTime" "$lastGetDateTime" "$message"
 
         done
+
+        #Check message from response queue matches message depth from data out queue
+	if [ -n "$4" ]; then
+	   orghere=$(cd $(dirname $(ls -l $0 | awk '{print $NF;}')) && pwd)
+           propFile="$orghere/../config/queueMapping.properties"
+	   if [ -f "$propFile" ]; then
+	      while IFS='=' read -r key value; do
+	          KEY_CMD_OUTPUT=$( eval 'echo "DISPLAY CDEPTH($key) CURDEPTH" | runmqsc $2')
+		  VAL_CMD_OUTPUT=$( eval 'echo "DISPLAY CDEPTH($value) CURDEPTH" | runmqsc $2')
+	          keyQueueDepth=$(echo "$KEY_CMD_OUTPUT" | awk '$1 ~ "CURDEPTH\\(.+\\)" {gsub("CURDEPTH\\(|\\)","");print $1}')
+	          valQueueDepth=$(echo "$VAL_CMD_OUTPUT" | awk '$1 ~ "CURDEPTH\\(.+\\)" {gsub("CURDEPTH\\(|\\)","");print $1}')
+		  if [ "$keyQueueDepth" == "" -o "$valQueueDepth" == "" ]; then
+		     continue;
+                  fi
+		  if [ "$keyQueueDepth" == "$valQueueDepth" ]; then
+		     printf "%s\n\n" "Queue: $key depth: $keyQueueDepth equals with queue: $value depth: $valQueueDepth"
+		  else
+		     printf "%s\n\n" "Queue: $key depth: $keyQueueDepth is not equal to queue: $value depth: $valQueueDepth"
+	          fi
+              done < "$propFile"
+           else
+              echo "Properties file $propFile not found."
+	   fi
+	fi
     else
 	printf "%s" "Queue Manager is not running"
     fi
 
     printf "\n\n%s\n" "$divider"
 fi
+
