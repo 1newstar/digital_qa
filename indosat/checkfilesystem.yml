@@ -1,0 +1,25 @@
+---
+- hosts: ec2-user@ec2-54-159-136-238.compute-1.amazonaws.com
+  sudo: true
+  remote_user: ec2-user
+  tasks:
+      - name: Echo task
+        command: echo "File System check"
+
+      - name: This command will shiw File System Details
+        shell:
+          cmd: df -khT
+          
+      - name: Print Host Name
+        debug:
+          var=ansible_hostname
+          
+     # - name: Show Survey Var
+     #   shell: echo "My Name is {{ my_name }}"
+          
+      - name: Transfer executable script script
+        copy: src=monitordisk.sh dest=/opt/ansible_script mode=0777
+ 
+      - name: Execute the script
+        command: sh /opt/ansible_script/monitordisk.sh      
+     

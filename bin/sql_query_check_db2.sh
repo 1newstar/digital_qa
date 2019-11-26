@@ -10,7 +10,7 @@
 # $1   - db2 database name
 # $2   - db2 username
 # $3   - db2 password
-# $4   - Application name
+# $4   - Application name for which queries will fetch from property file
 #
 #***********************************************************************************
 
